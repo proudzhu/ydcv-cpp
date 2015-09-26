@@ -14,9 +14,10 @@ using namespace std;
 // API KEY from ydcv
 #define API "YouDaoCV"
 #define API_KEY "659600698"
+#define API_VERSION "1.2"
 
 #define YD_BASE_URL "http://fanyi.youdao.com"
-#define YD_API_URL  (YD_BASE_URL "/openapi.do?keyfrom=" API "&key=" API_KEY "&type=data&doctype=json&version=1.1&q=")
+#define YD_API_URL  (YD_BASE_URL "/openapi.do?keyfrom=" API "&key=" API_KEY "&type=data&doctype=json&version=" API_VERSION "&q=")
 
 void print_explanation(Document& doc)
 {
