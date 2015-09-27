@@ -10,5 +10,4 @@ Depends:
 
 TODO:
 * color output
-* log level
 * selection translation

@@ -38,6 +38,8 @@ static struct {
 	vector<string> words;
 } cfg;
 
+static cpplog mylog;
+
 void print_explanation(Document& doc);
 
 void query(string &word) {
@@ -74,73 +76,66 @@ void query(string &word) {
 void print_explanation(Document& doc)
 {
 	int has_result = 0;
-	cout << doc["query"].GetString();
+	ILOG(mylog) << doc["query"].GetString();
 	if (doc.HasMember("basic")) {
 		has_result = 1;
 		Value &basic_dic = doc["basic"];
 		if (basic_dic.HasMember("uk-phonetic") || basic_dic.HasMember("us-phonetic"))
-			cout << " UK: [" << basic_dic["uk-phonetic"].GetString() <<
+			ILOG(mylog) << " UK: [" << basic_dic["uk-phonetic"].GetString() <<
 					"], US: [" << basic_dic["us-phonetic"].GetString() << "]" << endl;
 		else if (basic_dic.HasMember("phonetic"))
-			cout << " [" << basic_dic["phonetic"].GetString() << "]" << endl;
+			ILOG(mylog) << " [" << basic_dic["phonetic"].GetString() << "]" << endl;
 		else
-			cout << endl;
+			ILOG(mylog) << endl;
 
 		if (cfg.speech) {
 			if (basic_dic.HasMember("uk-speech") && basic_dic.HasMember("us-speech")) {
-				cout << "  Text to Speech:" << endl;
-				cout << "    * UK: " << basic_dic["uk-speech"].GetString() << endl;
-				cout << "    * US: " << basic_dic["us-speech"].GetString() << endl;
+				ILOG(mylog) << "  Text to Speech:" << endl;
+				ILOG(mylog) << "    * UK: " << basic_dic["uk-speech"].GetString() << endl;
+				ILOG(mylog) << "    * US: " << basic_dic["us-speech"].GetString() << endl;
 			}
 			else if (basic_dic.HasMember("speech"))
-				cout << "    * " << basic_dic["speech"].GetString() << endl;
-			cout << endl;
+				ILOG(mylog) << "    * " << basic_dic["speech"].GetString() << endl;
+			ILOG(mylog) << endl;
 		}
 
 		if (basic_dic.HasMember("explains")) {
-			cout << "  Word Explanation:" << endl;
+			ILOG(mylog) << "  Word Explanation:" << endl;
 			Value &explains = basic_dic["explains"];
 			for (auto itr = explains.Begin(); itr != explains.End(); ++itr)
-				cout << "     * " << itr->GetString() << endl;
+				ILOG(mylog) << "     * " << itr->GetString() << endl;
 		} else
-			cout << endl;
+			ILOG(mylog) << endl;
 	} else if (doc.HasMember("translation")) {
 		has_result = 1;
-		cout << endl;
-		cout << "  Translation:" << endl;
+		ILOG(mylog) << endl;
+		ILOG(mylog) << "  Translation:" << endl;
 		Value &trans = doc["translation"];
 		for (auto itr = trans.Begin(); itr != trans.End(); ++itr)
-			cout << "     * " << itr->GetString() << endl;
+			ILOG(mylog) << "     * " << itr->GetString() << endl;
 	} else {
-		cout << endl;
+		ILOG(mylog) << endl;
 	}
 
 	if (doc.HasMember("web")) {
 		has_result = 1;
-		cout << endl;
-		cout << "  Web Reference:" << endl;
+		ILOG(mylog) << endl;
+		ILOG(mylog) << "  Web Reference:" << endl;
 		Value &web_dic = doc["web"];
 		for (auto dic = web_dic.Begin(); dic != web_dic.End(); ++dic) {
-			cout << "     * " << (*dic)["key"].GetString() << endl;
-			cout << "      ";
+			ILOG(mylog) << "     * " << (*dic)["key"].GetString() << endl;
+			ILOG(mylog) << "      ";
 			Value &values = (*dic)["value"];
 			for (auto itr = values.Begin(); itr != values.End(); ++itr)
-				cout << " " << itr->GetString() << ";";
-			cout << endl;
+				ILOG(mylog) << " " << itr->GetString() << ";";
+			ILOG(mylog) << endl;
 		}
 	}
 
 	if (has_result == 0)
-		cout << " -- No result for this query." << endl;
+		ILOG(mylog) << " -- No result for this query." << endl;
 
-	cout << endl;
-}
-
-void to_cout(const vector<string> &v)
-{
-	copy(v.begin(), v.end(), ostream_iterator<string> {
-			cout, "\n"
-			});
+	ILOG(mylog) << endl;
 }
 
 int parse_options(int argc, char **argv)
@@ -157,6 +152,8 @@ int parse_options(int argc, char **argv)
 		("color", po::value<string>(), "{always,auto,never}"
 										"colorize the output. Default to 'auto' or can be\n"
 										"'never' or 'always'.")
+		("debug", "print debug info.")
+		("verbose", "print verbose info.")
 		("words", po::value<vector<string>>()->multitoken(), "words to lookup, or quoted sentences to translate.")
 		;
 
@@ -196,6 +193,12 @@ int parse_options(int argc, char **argv)
 			cout << "color only accept {always,auto,never}" << endl;
 	}
 
+	if (vm.count("debug"))
+		cfg.logmask |= LOG_DEBUG;
+
+	if (vm.count("verbose"))
+		cfg.logmask |= LOG_DEBUG | LOG_VERBOSE;
+
 	if (vm.count("words")) {
 		const vector<string> &v = vm["words"].as<vector<string>>();
 		// to_cout(v);
@@ -221,6 +224,8 @@ int main(int argc, char **argv)
 	{
 		return ret;
 	}
+
+	mylog.SetLogMask(cfg.logmask);
 
 	for (auto word : cfg.words) {
 		query(word);
