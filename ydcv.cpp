@@ -7,6 +7,10 @@
 /* boost */
 #include <boost/program_options.hpp>
 
+/* readline */
+#include <readline/readline.h>
+#include <readline/history.h>
+
 #include "cpplog.hpp"
 
 using std::string;
@@ -229,6 +233,21 @@ int main(int argc, char **argv)
 
 	for (auto word : cfg.words) {
 		query(word);
+	}
+
+	if (cfg.words.size() == 0) {
+		while (1) {
+			char* line = readline("> ");
+			add_history(line);
+			if (line == NULL) {
+				cout << "\nBye\n";
+				break;
+			} else {
+				string word = string(line);
+				query(word);
+				free(line);
+			}
+		}
 	}
 
 	return 0;
