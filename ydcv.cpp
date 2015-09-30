@@ -8,8 +8,7 @@
 #include <boost/program_options.hpp>
 
 /* readline */
-#include <readline/readline.h>
-#include <readline/history.h>
+#include "readline.hpp"
 
 #include "cpplog.hpp"
 
@@ -237,15 +236,14 @@ int main(int argc, char **argv)
 
 	if (cfg.words.size() == 0) {
 		while (1) {
-			char* line = readline("> ");
-			add_history(line);
-			if (line == NULL) {
+			yarw rl(string("> "));
+			string word = rl.getLine();
+			rl.addHistory(word);
+			if (word.empty()) {
 				cout << "\nBye\n";
 				break;
 			} else {
-				string word = string(line);
 				query(word);
-				free(line);
 			}
 		}
 	}
