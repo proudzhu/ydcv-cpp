@@ -46,8 +46,8 @@ static cpplog mylog;
 void print_explanation(Document& doc);
 
 void query(string &word) {
-	stringstream res;
-	curl_writer writer(res);
+	ostringstream res;
+	curl_ios<ostringstream> writer(res);
 	curl_easy easy(writer);
 
 	string url = string(YD_API_URL) + word;
@@ -188,7 +188,7 @@ int parse_options(int argc, char **argv)
 
 	if (vm.count("color")) {
 		string color = vm["color"].as<string>();
-		if (color == string("always"))
+		if (color == string("auto") || color == string("always"))
 			cfg.color = 1;
 		else if (color == string("never"))
 			cfg.color = 0;
