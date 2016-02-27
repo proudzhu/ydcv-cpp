@@ -4,6 +4,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
+using namespace std;
+
 class yarw
 {
 	public:

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <sstream>
-#include <curlcpp/curl_easy.h>
+#include <cpr/cpr.h>
 #include <rapidjson/reader.h>
 #include <rapidjson/document.h>
 
@@ -14,8 +14,6 @@
 
 using std::string;
 using std::stringstream;
-using curl::curl_easy;
-using namespace curl;
 using namespace rapidjson;
 using namespace std;
 using namespace CPPLOG;
@@ -46,34 +44,13 @@ static cpplog mylog;
 void print_explanation(Document& doc);
 
 void query(string &word) {
-	ostringstream res;
-	curl_ios<ostringstream> writer(res);
-	curl_easy easy(writer);
+	auto response = cpr::Get(cpr::Url{string(YD_API_URL) + word});
 
-	string url = string(YD_API_URL) + word;
+	Document doc;
 
-	easy.add(curl_pair<CURLoption, string>(CURLOPT_URL, url));
-	easy.add(curl_pair<CURLoption, long>(CURLOPT_FOLLOWLOCATION, 1L));
+	doc.Parse(response.text.c_str());
 
-	try {
-		Reader reader;
-		Document doc;
-
-		easy.perform();
-
-		string str(res.str());
-
-		doc.Parse(str.c_str());
-
-		print_explanation(doc);
-
-	} catch (curl_easy_exception error) {
-		// If you want to get the entire error stack we can do:
-		vector<pair<string,string>> errors = error.get_traceback();
-		// Otherwise we could print the stack like this:
-		error.print_traceback();
-		// Note that the printing the stack will erase it
-	}
+	print_explanation(doc);
 }
 
 void print_explanation(Document& doc)
