@@ -8,5 +8,5 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 add_subdirectory(opt)
 
 add_executable(ydcv-cpp ydcv.cpp)
-target_link_libraries(ydcv-cpp curlcpp curl boost_program_options readline ${CPR_LIBRARIES})
+target_link_libraries(ydcv-cpp curl boost_program_options readline ${CPR_LIBRARIES})
 include_directories(${CPR_INCLUDE_DIRS})
